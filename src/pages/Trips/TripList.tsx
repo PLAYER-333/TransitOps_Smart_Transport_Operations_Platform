@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Eye, CheckCircle2, XCircle, Send, Route } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { Plus, Eye, CheckCircle2, XCircle, Send } from 'lucide-react'
+import { supabase, IS_DEMO_MODE } from '@/lib/supabase'
+import { DEMO_TRIPS } from '@/lib/demoData'
 import { useAuth } from '@/contexts/AuthContext'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -36,6 +37,13 @@ export default function TripList() {
 
   const fetchTrips = useCallback(async () => {
     setLoading(true)
+    if (IS_DEMO_MODE) {
+      let data = DEMO_TRIPS as unknown as Trip[]
+      if (statusFilter !== 'all') data = data.filter(t => t.status === statusFilter)
+      setTrips(data)
+      setLoading(false)
+      return
+    }
     let q = supabase
       .from('trips')
       .select(`
@@ -67,7 +75,8 @@ export default function TripList() {
 
     // Update trip status. The DB triggers (on_trip_dispatched, on_trip_completed, on_trip_cancelled)
     // will automatically handle updating the vehicle and driver statuses!
-    const { error: err } = await supabase.from('trips').update({ status: newStatus }).eq('id', trip.id)
+    // @ts-ignore
+    const { error: err } = await supabase.from('trips').update({ status: newStatus } as any).eq('id', trip.id)
     
     setActionLoading(false)
     if (err) {

@@ -38,22 +38,22 @@ export default function DriverDetail() {
     if (!id) return
     let mounted = true
 
-    async function load() {
+    async function load(driverId: string) {
       const [dRes, tRes] = await Promise.all([
-        supabase.from('drivers').select('*').eq('id', id).single(),
+        supabase.from('drivers').select('*').eq('id', driverId).single(),
         supabase.from('trips')
           .select('id, source, destination, status, created_at')
-          .eq('driver_id', id)
+          .eq('driver_id', driverId)
           .order('created_at', { ascending: false })
           .limit(10),
       ])
       if (!mounted) return
-      if (dRes.data) setDriver(dRes.data as DriverDetail)
+      if ((dRes as any).data) setDriver((dRes as any).data as DriverDetail)
       if (tRes.data) setTrips(tRes.data as Trip[])
       setLoading(false)
     }
 
-    load()
+    load(id)
     return () => { mounted = false }
   }, [id])
 

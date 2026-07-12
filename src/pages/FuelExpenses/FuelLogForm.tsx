@@ -37,7 +37,7 @@ export function FuelLogForm({ onSuccess, onCancel }: FuelLogFormProps) {
       
       if (!mounted) return
       if (vData) {
-        setVehicles(vData.map(v => ({
+        setVehicles((vData as any[]).map(v => ({
           id: v.id,
           label: `${v.registration_number} - ${v.name_model}`
         })))
@@ -67,7 +67,7 @@ export function FuelLogForm({ onSuccess, onCancel }: FuelLogFormProps) {
       
       if (!mounted) return
       if (data) {
-        setTrips(data.map(t => ({
+        setTrips((data as any[]).map(t => ({
           id: t.id,
           label: `${t.source} to ${t.destination} (${new Date(t.created_at).toLocaleDateString()})`
         })))
@@ -93,7 +93,7 @@ export function FuelLogForm({ onSuccess, onCancel }: FuelLogFormProps) {
       log_date: form.log_date,
     }
 
-    const { error: err } = await supabase.from('fuel_logs').insert(payload)
+    const { error: err } = await supabase.from('fuel_logs').insert(payload as any)
 
     setLoading(false)
 

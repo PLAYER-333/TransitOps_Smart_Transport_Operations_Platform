@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Plus, Fuel, IndianRupee } from 'lucide-react'
+import { Fuel, IndianRupee } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { DataTable, type Column } from '@/components/ui/DataTable'

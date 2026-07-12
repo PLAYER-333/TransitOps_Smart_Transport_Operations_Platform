@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Pencil, Trash2, Truck, Eye } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
+import { supabase, IS_DEMO_MODE } from '@/lib/supabase'
+import { DEMO_VEHICLES } from '@/lib/demoData'
 import { useAuth } from '@/contexts/AuthContext'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { VehicleForm } from './VehicleForm'
 
 type Vehicle = {
@@ -38,6 +38,14 @@ export default function VehicleList() {
 
   const fetchVehicles = useCallback(async () => {
     setLoading(true)
+    if (IS_DEMO_MODE) {
+      let data = DEMO_VEHICLES as unknown as Vehicle[]
+      if (statusFilter !== 'all') data = data.filter(v => v.status === statusFilter)
+      if (typeFilter !== 'all') data = data.filter(v => v.type === typeFilter)
+      setVehicles(data)
+      setLoading(false)
+      return
+    }
     let q = supabase
       .from('vehicles')
       .select('id, registration_number, name_model, type, max_load_capacity, odometer, acquisition_cost, region, status, created_at')

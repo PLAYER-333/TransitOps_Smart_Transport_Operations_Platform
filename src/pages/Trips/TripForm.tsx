@@ -45,14 +45,14 @@ export function TripForm({ onSuccess, onCancel }: TripFormProps) {
       if (!mounted) return
 
       if (vRes.data) {
-        setVehicles(vRes.data.map(v => ({
+        setVehicles((vRes.data as any[]).map(v => ({
           id: v.id,
           label: `${v.registration_number} - ${v.name_model} (Max ${v.max_load_capacity}kg)`,
           capacity: v.max_load_capacity
         })))
       }
       if (dRes.data) {
-        setDrivers(dRes.data.map(d => ({
+        setDrivers((dRes.data as any[]).map(d => ({
           id: d.id,
           label: `${d.name} (${d.license_category})`
         })))
@@ -90,7 +90,7 @@ export function TripForm({ onSuccess, onCancel }: TripFormProps) {
       created_by: user?.id,
     }
 
-    const { error: err } = await supabase.from('trips').insert(payload)
+    const { error: err } = await supabase.from('trips').insert(payload as any)
 
     setLoading(false)
 

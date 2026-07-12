@@ -56,9 +56,16 @@ export function DriverForm({ driver, onSuccess, onCancel }: DriverFormProps) {
       status: form.status,
     }
 
-    const { error: err } = driver
-      ? await supabase.from('drivers').update(payload).eq('id', driver.id)
-      : await supabase.from('drivers').insert(payload)
+    let err: any;
+    if (driver) {
+      // @ts-ignore
+      const res = await supabase.from('drivers').update(payload as any).eq('id', driver.id)
+      err = res.error
+    } else {
+      // @ts-ignore
+      const res = await supabase.from('drivers').insert(payload as any)
+      err = res.error
+    }
 
     setLoading(false)
 

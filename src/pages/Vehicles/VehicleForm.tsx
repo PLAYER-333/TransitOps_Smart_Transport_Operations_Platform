@@ -56,9 +56,16 @@ export function VehicleForm({ vehicle, onSuccess, onCancel }: VehicleFormProps) 
       status: form.status,
     }
 
-    const { error: err } = vehicle
-      ? await supabase.from('vehicles').update(payload).eq('id', vehicle.id)
-      : await supabase.from('vehicles').insert(payload)
+    let err: any;
+    if (vehicle) {
+      // @ts-ignore
+      const res = await supabase.from('vehicles').update(payload as any).eq('id', vehicle.id)
+      err = res.error
+    } else {
+      // @ts-ignore
+      const res = await supabase.from('vehicles').insert(payload as any)
+      err = res.error
+    }
 
     setLoading(false)
 

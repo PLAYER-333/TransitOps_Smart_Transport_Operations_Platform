@@ -37,7 +37,7 @@ export function MaintenanceForm({ onSuccess, onCancel }: MaintenanceFormProps) {
       if (!mounted) return
 
       if (data) {
-        setVehicles(data.map(v => ({
+        setVehicles((data as any[]).map(v => ({
           id: v.id,
           label: `${v.registration_number} - ${v.name_model}`
         })))
@@ -64,7 +64,7 @@ export function MaintenanceForm({ onSuccess, onCancel }: MaintenanceFormProps) {
       is_active: true,
     }
 
-    const { error: err } = await supabase.from('maintenance_logs').insert(payload)
+    const { error: err } = await supabase.from('maintenance_logs').insert(payload as any)
 
     setLoading(false)
 

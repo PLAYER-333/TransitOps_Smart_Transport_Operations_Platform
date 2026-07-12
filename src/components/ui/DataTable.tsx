@@ -42,9 +42,10 @@ export function DataTable<T extends Record<string, unknown>>({
   const filtered = useMemo(() => {
     if (!search.trim()) return data
     const q = search.toLowerCase()
-    return data.filter(row =>
-      searchKeys.some(k => String(row[k] ?? '').toLowerCase().includes(q))
-    )
+    return data.filter(row => {
+      const matches = searchKeys.some((k) => String(row[k as keyof T] ?? '').toLowerCase().includes(q))
+      return matches
+    })
   }, [data, search, searchKeys])
 
   const sorted = useMemo(() => {
@@ -83,7 +84,7 @@ export function DataTable<T extends Record<string, unknown>>({
         <div className="divide-y divide-surface-border">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="px-4 py-3 flex gap-4">
-              {columns.map((c, j) => (
+              {columns.map((_, j) => (
                 <div key={j} className="skeleton h-4 flex-1" />
               ))}
             </div>

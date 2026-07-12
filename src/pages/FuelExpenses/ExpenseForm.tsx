@@ -35,7 +35,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
       
       if (!mounted) return
       if (vData) {
-        setVehicles(vData.map(v => ({
+        setVehicles((vData as any[]).map(v => ({
           id: v.id,
           label: `${v.registration_number} - ${v.name_model}`
         })))
@@ -62,7 +62,7 @@ export function ExpenseForm({ onSuccess, onCancel }: ExpenseFormProps) {
       note: form.note.trim() || null,
     }
 
-    const { error: err } = await supabase.from('expenses').insert(payload)
+    const { error: err } = await supabase.from('expenses').insert(payload as any)
 
     setLoading(false)
 

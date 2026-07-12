@@ -57,7 +57,8 @@ export default function MaintenanceList() {
     // The DB trigger `on_maintenance_closed` handles resetting the vehicle status
     const { error: err } = await supabase
       .from('maintenance_logs')
-      .update({ is_active: false, closed_at: new Date().toISOString() })
+      // @ts-ignore
+      .update({ is_active: false, closed_at: new Date().toISOString() } as any)
       .eq('id', closeTarget.id)
 
     setCloseLoading(false)

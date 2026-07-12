@@ -61,10 +61,10 @@ export default function Reports() {
       }
 
       if (fuelRes.data) {
-        fuelRes.data.forEach(f => addToMonth(f.log_date, 'fuel_cost', Number(f.cost)))
+        fuelRes.data.forEach((f: any) => addToMonth(f.log_date, 'fuel_cost', Number(f.cost)))
       }
       if (maintRes.data) {
-        maintRes.data.forEach(m => addToMonth(m.created_at, 'maintenance_cost', Number(m.cost)))
+        maintRes.data.forEach((m: any) => addToMonth(m.created_at, 'maintenance_cost', Number(m.cost)))
       }
 
       // Sort months chronologically

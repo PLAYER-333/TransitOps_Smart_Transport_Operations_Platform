@@ -46,7 +46,7 @@ export default function TripDetail() {
   useEffect(() => {
     if (!id) return
     let mounted = true
-    async function load() {
+    async function load(tripId: string) {
       const { data } = await supabase
         .from('trips')
         .select(`
@@ -54,21 +54,21 @@ export default function TripDetail() {
           vehicles(registration_number, name_model),
           drivers(name)
         `)
-        .eq('id', id)
+        .eq('id', tripId)
         .single()
       
       if (!mounted) return
       if (data) {
         setTrip(data as unknown as TripDetail)
         setCompletionForm({
-          final_odometer: data.final_odometer?.toString() || '',
-          fuel_consumed: data.fuel_consumed?.toString() || '',
-          revenue: data.revenue?.toString() || '',
+          final_odometer: (data as any).final_odometer?.toString() || '',
+          fuel_consumed: (data as any).fuel_consumed?.toString() || '',
+          revenue: (data as any).revenue?.toString() || '',
         })
       }
       setLoading(false)
     }
-    load()
+    load(id)
     return () => { mounted = false }
   }, [id])
 
@@ -84,7 +84,8 @@ export default function TripDetail() {
       revenue: completionForm.revenue ? Number(completionForm.revenue) : null,
     }
 
-    const { error: err } = await supabase.from('trips').update(payload).eq('id', trip.id)
+    // @ts-ignore
+    const { error: err } = await supabase.from('trips').update(payload as any).eq('id', trip.id)
     
     setSubmitting(false)
     if (err) {

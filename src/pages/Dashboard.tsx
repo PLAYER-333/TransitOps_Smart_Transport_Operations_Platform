@@ -7,13 +7,13 @@ import {
 import {
   PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer,
-  LineChart, Line,
 } from 'recharts'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_DEMO_MODE } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 import { KPICard } from '@/components/ui/KPICard'
 import { Badge } from '@/components/ui/Badge'
 import { format } from 'date-fns'
+import { DEMO_VEHICLES, DEMO_TRIPS, DEMO_DRIVERS } from '@/lib/demoData'
 
 interface DashboardStats {
   totalVehicles: number
@@ -55,32 +55,40 @@ export default function Dashboard() {
 
     async function loadDashboard() {
       try {
-        const [vehiclesRes, tripsRes, driversRes] = await Promise.all([
-          supabase.from('vehicles').select('id, status').eq('status', 'Available').select('status'),
-          supabase.from('trips').select('id, status, source, destination, created_at, vehicle_id, driver_id').order('created_at', { ascending: false }).limit(5),
-          supabase.from('drivers').select('id, status'),
-        ])
+        let allVehicles: any[] = []
+        let trips: any[] = []
+        let drivers: any[] = []
 
-        // Separate vehicle status query for all statuses
-        const { data: allVehicles } = await supabase
-          .from('vehicles')
-          .select('id, status, registration_number, name_model')
+        if (IS_DEMO_MODE) {
+          allVehicles = DEMO_VEHICLES
+          trips = DEMO_TRIPS
+          drivers = DEMO_DRIVERS
+        } else {
+          const [tripsRes, driversRes] = await Promise.all([
+            supabase.from('trips').select('id, status, source, destination, created_at, vehicle_id, driver_id').order('created_at', { ascending: false }).limit(5),
+            supabase.from('drivers').select('id, status'),
+          ])
+          const { data: vehiclesData } = await supabase
+            .from('vehicles')
+            .select('id, status, registration_number, name_model')
+          allVehicles = vehiclesData ?? []
+          trips = tripsRes.data ?? []
+          drivers = driversRes.data ?? []
+        }
 
         if (!mounted) return
 
         // Compute stats
         const vehicles = allVehicles ?? []
-        const trips = tripsRes.data ?? []
-        const drivers = driversRes.data ?? []
 
-        const available = vehicles.filter(v => v.status === 'Available').length
-        const inMaintenance = vehicles.filter(v => v.status === 'In Shop').length
-        const onTrip = vehicles.filter(v => v.status === 'On Trip').length
-        const retired = vehicles.filter(v => v.status === 'Retired').length
+        const available = vehicles.filter((v: any) => v.status === 'Available').length
+        const inMaintenance = vehicles.filter((v: any) => v.status === 'In Shop').length
+        const onTrip = vehicles.filter((v: any) => v.status === 'On Trip').length
+        const retired = vehicles.filter((v: any) => v.status === 'Retired').length
 
-        const activeTrips = trips.filter(t => t.status === 'Dispatched').length
-        const pendingTrips = trips.filter(t => t.status === 'Draft').length
-        const driversOnDuty = drivers.filter(d => d.status === 'On Trip').length
+        const activeTrips = trips.filter((t: any) => t.status === 'Dispatched').length
+        const pendingTrips = trips.filter((t: any) => t.status === 'Draft').length
+        const driversOnDuty = drivers.filter((d: any) => d.status === 'On Trip').length
 
         const totalActive = vehicles.length - retired
         const utilization = totalActive > 0 ? Math.round((onTrip / totalActive) * 100) : 0
@@ -107,7 +115,7 @@ export default function Dashboard() {
         const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
         const weekData = days.map((day, i) => ({
           day,
-          trips: trips.filter(t => {
+          trips: trips.filter((t: any) => {
             const d = new Date(t.created_at)
             return d.getDay() === (i + 1) % 7
           }).length,
@@ -115,8 +123,10 @@ export default function Dashboard() {
         setWeeklyTrips(weekData)
 
         // Recent trips with vehicle + driver name
-        if (trips.length > 0) {
-          const tripIds = trips.map(t => t.id)
+        if (IS_DEMO_MODE) {
+          if (mounted) setRecentTrips(trips.slice(0, 5) as RecentTrip[])
+        } else if (trips.length > 0) {
+          const tripIds = trips.map((t: any) => t.id)
           const { data: fullTrips } = await supabase
             .from('trips')
             .select('id, source, destination, status, created_at, vehicles(registration_number, name_model), drivers(name)')

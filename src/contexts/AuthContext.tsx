@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
-import type { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import type { Session } from '@supabase/supabase-js'
+import { supabase, IS_DEMO_MODE } from '@/lib/supabase'
+import { DEMO_USER } from '@/lib/demoData'
 
 export type UserRole = 'fleet_manager' | 'driver' | 'safety_officer' | 'financial_analyst'
 
@@ -15,7 +16,8 @@ interface AuthContextValue {
   user: AuthUser | null
   session: Session | null
   loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>
+  isDemo: boolean
+  signIn: (email: string, password: string, demoRole?: UserRole) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
 }
 
@@ -26,34 +28,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
 
-  /**
-   * Fetch role from the server-controlled user_roles table.
-   * Role is NEVER read from the JWT claim — only from this table + RLS.
-   */
-  const fetchUserRole = useCallback(async (authUser: User): Promise<AuthUser | null> => {
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role, region')
-      .eq('user_id', authUser.id)
-      .single()
+  const fetchUserRole = useCallback(async (authUser: { id: string; email?: string | null }): Promise<AuthUser | null> => {
+    if (IS_DEMO_MODE) return null
+    try {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role, region')
+        .eq('user_id', authUser.id)
+        .single()
 
-    if (error || !data) {
-      // User has no role assigned — treat as unauthenticated
+      if (!roleData) return null
+
+      return {
+        id: authUser.id,
+        email: authUser.email ?? '',
+        role: (roleData as any).role,
+        region: (roleData as any).region,
+      }
+    } catch {
       return null
-    }
-
-    return {
-      id: authUser.id,
-      email: authUser.email ?? '',
-      role: data.role,
-      region: data.region,
     }
   }, [])
 
   useEffect(() => {
+    if (IS_DEMO_MODE) {
+      // In demo mode, start logged out (let the Login page handle it)
+      setLoading(false)
+      return
+    }
+
     let mounted = true
 
-    // Get initial session
     supabase.auth.getSession().then(async ({ data: { session: s } }) => {
       if (!mounted) return
       setSession(s)
@@ -64,7 +69,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
     })
 
-    // Listen to auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, s) => {
         if (!mounted) return
@@ -85,23 +89,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [fetchUserRole])
 
-  const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+  const signIn = useCallback(async (email: string, _password: string, demoRole?: UserRole) => {
+    if (IS_DEMO_MODE) {
+      // Demo login — pick role from email or explicit demoRole param
+      const roleMap: Record<string, UserRole> = {
+        'manager@transitops.demo': 'fleet_manager',
+        'driver@transitops.demo': 'driver',
+        'safety@transitops.demo': 'safety_officer',
+        'finance@transitops.demo': 'financial_analyst',
+      }
+      const role = demoRole ?? roleMap[email] ?? 'fleet_manager'
+      setUser({ ...DEMO_USER, email, role })
+      return { error: null }
+    }
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password: _password })
     if (error) {
-      // Return generic message — do not expose internal error details to client
       return { error: 'Invalid credentials. Please check your email and password.' }
     }
     return { error: null }
   }, [])
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut()
+    if (!IS_DEMO_MODE) await supabase.auth.signOut()
     setUser(null)
     setSession(null)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, session, loading, isDemo: IS_DEMO_MODE, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

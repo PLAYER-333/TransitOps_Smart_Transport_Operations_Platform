@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { Plus, Pencil, Trash2, Eye, AlertTriangle } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase, IS_DEMO_MODE } from '@/lib/supabase'
+import { DEMO_DRIVERS } from '@/lib/demoData'
 import { useAuth } from '@/contexts/AuthContext'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
@@ -15,6 +16,7 @@ type Driver = {
   license_number: string
   license_category: string
   license_expiry: string
+  contact_number: string
   safety_score: number
   region: string | null
   status: 'Available' | 'On Trip' | 'Off Duty' | 'Suspended'
@@ -64,10 +66,16 @@ export default function DriverList() {
 
   const fetchDrivers = useCallback(async () => {
     setLoading(true)
-    // Select only needed fields — avoid dumping PII unnecessarily
+    if (IS_DEMO_MODE) {
+      let data = DEMO_DRIVERS as unknown as Driver[]
+      if (statusFilter !== 'all') data = data.filter(d => d.status === statusFilter)
+      setDrivers(data)
+      setLoading(false)
+      return
+    }
     let q = supabase
       .from('drivers')
-      .select('id, name, license_number, license_category, license_expiry, safety_score, region, status, created_at')
+      .select('id, name, license_number, license_category, license_expiry, contact_number, safety_score, region, status, created_at')
       .order('name')
 
     if (statusFilter !== 'all') q = q.eq('status', statusFilter)

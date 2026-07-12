@@ -1,9 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Plus, ShieldAlert, Settings } from 'lucide-react'
+import { Plus, ShieldAlert } from 'lucide-react'
+import { Modal } from '@/components/ui/Modal'
 import { supabase } from '@/lib/supabase'
 import { DataTable, type Column } from '@/components/ui/DataTable'
-import { Modal } from '@/components/ui/Modal'
-import { Badge } from '@/components/ui/Badge'
 import { format } from 'date-fns'
 
 interface AppUser {

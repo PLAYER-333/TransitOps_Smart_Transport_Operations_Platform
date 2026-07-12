@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Truck, Wrench, Fuel, DollarSign } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/Badge'
@@ -47,22 +47,22 @@ export default function VehicleDetail() {
     if (!id) return
     let mounted = true
 
-    async function load() {
+    async function load(vehicleId: string) {
       const [vRes, mRes, fRes, costRes] = await Promise.all([
-        supabase.from('vehicles').select('*').eq('id', id).single(),
-        supabase.from('maintenance_logs').select('id, description, cost, is_active, created_at').eq('vehicle_id', id).order('created_at', { ascending: false }).limit(10),
-        supabase.from('fuel_logs').select('id, liters, cost, log_date').eq('vehicle_id', id).order('log_date', { ascending: false }).limit(10),
-        supabase.from('vehicle_operational_cost').select('fuel_cost, maintenance_cost, total_operational_cost').eq('id', id).single(),
+        supabase.from('vehicles').select('*').eq('id', vehicleId).single(),
+        supabase.from('maintenance_logs').select('id, description, cost, is_active, created_at').eq('vehicle_id', vehicleId).order('created_at', { ascending: false }).limit(10),
+        supabase.from('fuel_logs').select('id, liters, cost, log_date').eq('vehicle_id', vehicleId).order('log_date', { ascending: false }).limit(10),
+        supabase.from('vehicle_operational_cost').select('fuel_cost, maintenance_cost, total_operational_cost').eq('id', vehicleId).single(),
       ])
       if (!mounted) return
-      if (vRes.data) setVehicle(vRes.data as VehicleDetail)
+      if ((vRes as any).data) setVehicle((vRes as any).data as VehicleDetail)
       if (mRes.data) setMaintenance(mRes.data as MaintenanceLog[])
       if (fRes.data) setFuel(fRes.data as FuelLog[])
-      if (costRes.data) setOpCost(costRes.data as typeof opCost)
+      if ((costRes as any).data) setOpCost((costRes as any).data as typeof opCost)
       setLoading(false)
     }
 
-    load()
+    load(id)
     return () => { mounted = false }
   }, [id])
 

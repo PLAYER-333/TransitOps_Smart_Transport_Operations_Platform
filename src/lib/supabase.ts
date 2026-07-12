@@ -1,22 +1,23 @@
+/// <reference types="vite/client" />
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from './database.types'
 
-// These are read from environment variables — never hardcoded.
-// See .env.example for the required variables.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL ?? ''
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? ''
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. ' +
-    'Copy .env.example to .env.local and fill in your project credentials.'
-  )
-}
+export const IS_DEMO_MODE = !supabaseUrl || !supabaseAnonKey ||
+  supabaseUrl === 'https://your-project-ref.supabase.co'
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
-  },
-})
+// Always create the client — even in demo mode (it will just fail on real calls,
+// which the demo mocks intercept before reaching the network).
+export const supabase = createClient<Database>(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key',
+  {
+    auth: {
+      persistSession: !IS_DEMO_MODE,
+      autoRefreshToken: !IS_DEMO_MODE,
+      detectSessionInUrl: !IS_DEMO_MODE,
+    },
+  }
+)
