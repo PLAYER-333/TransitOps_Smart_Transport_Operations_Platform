@@ -1,0 +1,207 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------------------------------------------------------ */
+/* Base resets & global styles                                          */
+/* ------------------------------------------------------------------ */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-surface-bg text-content-primary font-sans text-body;
+    margin: 0;
+    min-height: 100dvh;
+  }
+
+  /* Focus ring — consistent across all interactive elements */
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary-light ring-offset-2;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-surface-bg;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-content-secondary;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Component layer — reusable patterns                                  */
+/* ------------------------------------------------------------------ */
+@layer components {
+  /* Status badge — pill shaped, 12% opacity background */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-pill text-caption font-medium;
+  }
+  .badge-available {
+    background-color: rgb(22 163 74 / 0.12);
+    @apply text-status-available;
+  }
+  .badge-on-trip {
+    background-color: rgb(37 99 235 / 0.12);
+    @apply text-status-on-trip;
+  }
+  .badge-in-shop {
+    background-color: rgb(217 119 6 / 0.12);
+    @apply text-status-in-shop;
+  }
+  .badge-retired, .badge-suspended {
+    background-color: rgb(220 38 38 / 0.12);
+    @apply text-status-retired;
+  }
+  .badge-draft {
+    background-color: rgb(148 163 184 / 0.12);
+    @apply text-status-draft;
+  }
+  .badge-completed {
+    background-color: rgb(22 163 74 / 0.12);
+    @apply text-status-available;
+  }
+  .badge-cancelled {
+    background-color: rgb(220 38 38 / 0.12);
+    @apply text-status-retired;
+  }
+  .badge-dispatched {
+    background-color: rgb(37 99 235 / 0.12);
+    @apply text-status-on-trip;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-surface-card rounded-xl border border-surface-border shadow-card;
+  }
+
+  /* Form input */
+  .form-input {
+    @apply w-full px-3 py-2 text-body border border-surface-border rounded-lg
+           bg-white text-content-primary placeholder:text-content-secondary
+           focus:outline-none focus:ring-2 focus:ring-primary-light focus:border-transparent
+           transition-shadow duration-150;
+  }
+  .form-input:disabled {
+    @apply bg-slate-50 cursor-not-allowed opacity-60;
+  }
+
+  /* Form label */
+  .form-label {
+    @apply block text-body font-medium text-content-primary mb-1;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-primary text-white
+           text-body font-medium rounded-lg
+           hover:bg-primary-light focus-visible:ring-2 focus-visible:ring-primary-light
+           active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Secondary button */
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white text-content-primary
+           text-body font-medium rounded-lg border border-surface-border
+           hover:bg-surface-bg active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Danger button */
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white
+           text-body font-medium rounded-lg
+           hover:bg-red-700 active:scale-95 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 text-content-secondary
+           text-body font-medium rounded-lg
+           hover:bg-surface-bg active:scale-95 transition-all duration-150;
+  }
+
+  /* Icon button */
+  .btn-icon {
+    @apply inline-flex items-center justify-center w-8 h-8 rounded-lg
+           text-content-secondary hover:bg-surface-bg hover:text-content-primary
+           transition-colors duration-150;
+  }
+
+  /* Table */
+  .data-table {
+    @apply w-full text-body;
+  }
+  .data-table th {
+    @apply px-4 py-3 text-left text-caption font-medium text-content-secondary uppercase tracking-wide
+           bg-surface-bg border-b border-surface-border;
+  }
+  .data-table td {
+    @apply px-4 py-3 text-content-primary border-b border-surface-border;
+  }
+  .data-table tr:last-child td {
+    @apply border-b-0;
+  }
+  .data-table tbody tr {
+    @apply hover:bg-surface-bg transition-colors duration-100;
+  }
+
+  /* Sidebar nav item */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-blue-100
+           hover:bg-white/10 transition-all duration-150 cursor-pointer text-body font-medium;
+  }
+  .nav-item.active {
+    @apply bg-white/15 text-white;
+  }
+  .nav-item-icon {
+    @apply flex-shrink-0 w-5 h-5;
+  }
+
+  /* KPI Card */
+  .kpi-card {
+    @apply card p-5 flex flex-col gap-2 hover:shadow-card-hover transition-shadow duration-200;
+  }
+
+  /* Section header */
+  .page-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Utility overrides                                                    */
+/* ------------------------------------------------------------------ */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
+  }
+
+  /* Skeleton loading pulse */
+  .skeleton {
+    @apply animate-pulse bg-slate-200 rounded;
+  }
+
+  /* Safe bottom padding for mobile */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+}
