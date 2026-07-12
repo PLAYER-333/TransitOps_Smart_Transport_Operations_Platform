@@ -1,2 +1,12 @@
 # TransitOps_Smart_Transport_Operations_Platform
-hello world
+FRONTEND:
+
+
+BACKEND:
+
+DATABASE:  POSTGRES SQL,SUPABASE
+
+
+DEPLOYMENT:
+
+VERCEL
