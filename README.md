@@ -1,2 +1,9 @@
 # TransitOps_Smart_Transport_Operations_Platform
-THis is readme file 
+FRONTEND
+
+BACKEND:-
+
+DATABASE:- PostGresSQL
+
+
+DEPLOYMENT:- Vercel
